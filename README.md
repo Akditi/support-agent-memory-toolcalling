@@ -1,6 +1,6 @@
 # AI-Powered Customer Support Agent
 
-A copilot for customer support agents that drafts ticket replies using retrieval-augmented generation over a knowledge base, long-term customer memory, tool-calling, input/output guardrails, and request tracing — served via FastAPI with a Streamlit dashboard.
+An AI-powered customer support copilot that drafts ticket replies using retrieval-augmented generation over a knowledge base, long-term customer memory (Mem0), and selective tool-calling — with input/output guardrails and request tracing. Served via FastAPI with a Streamlit dashboard.
 
 ## Features
 
@@ -53,8 +53,8 @@ evals/                        # golden dataset + Ragas/DeepEval evaluation harne
 ## Installation
 
 ```bash
-git clone <this-repo>
-cd cutomer_support_agent_live-main
+git clone https://github.com/Akditi/support-agent-memory-toolcalling.git
+cd support-agent-memory-toolcalling
 uv sync
 ```
 
