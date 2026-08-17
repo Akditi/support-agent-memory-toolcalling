@@ -1,23 +1,26 @@
-from __future__ import annotations 
+from __future__ import annotations
 
-from functools import lru_cache 
-from pathlib import Path 
+from functools import lru_cache
+from pathlib import Path
 
-from pydantic_settings import BaseSettings, SettingsConfigDict 
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
 
-    model_config  = SettingsConfigDict(
-        env_file = ".env",
-        env_file_encoding = "utf-8",
-        extra = "ignore"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
     app_name: str = "AI Copilot for Support Agents"
 
     groq_api_key: str = ""
-    groq_model: str = "llama-3.1-8b-instant"
+    # Leave empty to auto-detect the best currently-available free Groq model
+    # at runtime via effective_groq_model(). Set this explicitly only if you
+    # want to pin a specific model instead of auto-detection.
+    groq_model: str = ""
     llm_temperature: float = 0.2
 
 
@@ -50,24 +53,24 @@ class Settings(BaseSettings):
 
     def resolve(self, path: Path) -> Path:
         """Resolve relative paths against the project root."""
-        return path if path.is_absolute() else self.workspace_dir / path  
-    
-    @property 
+        return path if path.is_absolute() else self.workspace_dir / path
+
+    @property
     def db_file(self) -> Path:
         return self.resolve(self.db_path)
-    
-    @property 
+
+    @property
     def chroma_rag_path(self) -> Path:
         return self.resolve(self.chroma_rag_dir)
-    
-    @property 
+
+    @property
     def chroma_mem0_path(self) -> Path:
         return self.resolve(self.chroma_mem0_dir)
-    
+
     @property
     def knowledge_base_path(self) -> Path:
         return self.resolve(self.knowledge_base_dir)
-    
+
     @property
     def trace_dir_path(self) -> Path:
         return self.resolve(self.trace_dir)
@@ -100,6 +103,25 @@ class Settings(BaseSettings):
 
         return model
 
+    def effective_groq_model(self) -> str:
+        """
+        Resolve the actual Groq model to use: the explicit GROQ_MODEL override
+        if one is set, otherwise the best currently-available free model,
+        auto-detected live from Groq (see integrations/llm/groq_models.py).
+
+        Centralized here so every call site (the copilot agent, the guardrails
+        scope classifier, and Mem0's internal LLM) resolves the model the same
+        way instead of each hardcoding it independently.
+        """
+        if self.groq_model:
+            return self.groq_model
+
+        from customer_support_agent.integrations.llm.groq_models import (
+            get_default_groq_model,
+        )
+
+        return get_default_groq_model(self.groq_api_key)
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
@@ -117,4 +139,3 @@ def ensure_directories(settings: Settings | None = None) -> None:
         config.trace_dir_path
     ):
         path.mkdir(parents=True, exist_ok=True)
-

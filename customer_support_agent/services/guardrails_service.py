@@ -547,7 +547,7 @@ class GuardrailsService:
 
         try:
             self._classifier_llm = ChatGroq(
-                model=self._settings.groq_model,
+                model=self._settings.effective_groq_model(),
                 groq_api_key=self._settings.groq_api_key,
                 temperature=0.0,
             )

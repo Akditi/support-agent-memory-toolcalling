@@ -20,7 +20,7 @@ class CustomerMemoryStore:
             "llm": {
                 "provider": "groq",
                 "config": {
-                    "model": settings.groq_model,
+                    "model": settings.effective_groq_model(),
                     "api_key": settings.groq_api_key,
                     "temperature": settings.llm_temperature,
                 },

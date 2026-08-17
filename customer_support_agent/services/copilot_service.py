@@ -30,7 +30,7 @@ class SupportCopilot:
         self._guardrails = guardrails or GuardrailsService(settings=settings)
         self._tracer = tracer or NoOpTracer()
         self._llm = ChatGroq(
-            model=settings.groq_model,
+            model=settings.effective_groq_model(),
             groq_api_key=settings.groq_api_key,
             temperature=settings.llm_temperature,
         )
@@ -937,4 +937,3 @@ class SupportCopilot:
                 return draft_text
         except Exception:
             return ""
-
